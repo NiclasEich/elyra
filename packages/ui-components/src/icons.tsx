@@ -22,6 +22,7 @@ import codeSnippetSvg from '../style/icons/code-snippet.svg';
 import containerSvg from '../style/icons/container.svg';
 import dragDropSvg from '../style/icons/dragdrop.svg';
 import errorIconSvg from '../style/icons/error.svg';
+import execIconSvg from '../style/icons/exec-logo.svg';
 import exportPipelineSvg from '../style/icons/export-pipeline.svg';
 import helpIconSvg from '../style/icons/help.svg';
 import importSvg from '../style/icons/import.svg';
@@ -102,6 +103,10 @@ export const rIcon = new LabIcon({
 export const pyIcon = new LabIcon({
   name: 'elyra:pyIcon',
   svgstr: pyIconSvg
+});
+export const execIcon = new LabIcon({
+  name: 'elyra:execIcon',
+  svgstr: execIconSvg
 });
 export const scalaIcon = new LabIcon({
   name: 'elyra:scalaIcon',
