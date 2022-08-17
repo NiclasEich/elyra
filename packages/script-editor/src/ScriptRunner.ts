@@ -95,11 +95,16 @@ export class ScriptRunner {
         // session didn't get started
         return this.errorDialog(SESSION_ERROR_MSG);
       }
+      // const custom_code = `print("Starting ${contextPath}")\ncommand = "python ${contextPath}"\n!{command}\nprint("Finished execution")`
+      code = `print("Starting ${contextPath}")\ncommand = "python ${contextPath}"\n!{command}\nprint("Finished execution")`;
+      console.log('File content:\n' + code);
+      // console.log('Running code:\n' + custom_code);
 
       const future = this.sessionConnection.kernel.requestExecute({ code });
 
       future.onIOPub = (msg: any): void => {
         const msgOutput: any = {};
+        console.log('MEssage type: ' + msg.msg_type);
 
         if (msg.msg_type === 'error') {
           msgOutput.error = {

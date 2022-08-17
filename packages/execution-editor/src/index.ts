@@ -48,7 +48,6 @@ const commandIDs = {
   openDocManager: 'docmanager:open',
   newDocManager: 'docmanager:new-untitled'
 };
-
 /**
  * Initialization data for the python-editor-extension extension.
  */
@@ -253,5 +252,4 @@ const extension: JupyterFrontEndPlugin<void> = {
     });
   }
 };
-
 export default extension;
