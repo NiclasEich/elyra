@@ -71,6 +71,7 @@ export class ScriptRunner {
     kernelName: string | undefined,
     contextPath: string,
     code: string,
+    execType: string | undefined,
     handleKernelMsg: (msgOutput: any) => void
   ): Promise<any> => {
     if (!kernelName) {
@@ -95,8 +96,18 @@ export class ScriptRunner {
         // session didn't get started
         return this.errorDialog(SESSION_ERROR_MSG);
       }
+      console.log('Kernel name:\t' + kernelName);
+      console.log('execType:\t' + execType);
       // const custom_code = `print("Starting ${contextPath}")\ncommand = "python ${contextPath}"\n!{command}\nprint("Finished execution")`
-      code = `print("Starting ${contextPath}")\ncommand = "python ${contextPath}"\n!{command}\nprint("Finished execution")`;
+      if (execType == 0) {
+        code = `print("Starting ${contextPath} locally")\ncommand = "python ${contextPath}"\n!{command}\nprint("Finished execution")`;
+      }
+      if (execType == 1) {
+        code = `print("Executing ${contextPath} on GPU cluster")\ncommand = "python ${contextPath}"\n!{command}\nprint("Finished execution")`;
+      }
+      if (execType == 2) {
+        code = `print("Executing ${contextPath} on CPU cluster")\ncommand = "python ${contextPath}"\n!{command}\nprint("Finished execution")`;
+      }
       console.log('File content:\n' + code);
       // console.log('Running code:\n' + custom_code);
 

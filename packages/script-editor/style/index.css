@@ -81,3 +81,11 @@ select.elyra-ScriptEditor-KernelSelector {
   display: inline-block;
   vertical-align: text-bottom;
 }
+
+select.elyra-ScriptEditor-ClusterSelector {
+  border: none;
+  background: none;
+  color: var(--jp-ui-font-color1);
+  display: inline-block;
+  vertical-align: text-bottom;
+}

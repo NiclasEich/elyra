@@ -152,7 +152,8 @@ export class SubmitFileButtonExtension<
     });
 
     // Add the toolbar button to the editor
-    editor.toolbar.insertItem(10, 'submitFile', submitFileButton);
+
+    // editor.toolbar.insertItem(10, 'submitFile', submitFileButton);
 
     // The ToolbarButton class implements `IDisposable`, so the
     // button *is* the extension for the purposes of this method.

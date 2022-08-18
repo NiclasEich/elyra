@@ -40,6 +40,7 @@ import { BoxLayout, PanelLayout, Widget } from '@lumino/widgets';
 import React, { RefObject } from 'react';
 
 import { KernelDropdown, ISelect } from './KernelDropdown';
+import { ClusterDropdown } from './KernelDropdown';
 import { ScriptEditorController } from './ScriptEditorController';
 import { ScriptRunner } from './ScriptRunner';
 
@@ -64,6 +65,7 @@ export abstract class ScriptEditor extends DocumentWidget<
 > {
   private runner: ScriptRunner;
   private kernelName?: string;
+  private execType?: string;
   private dockPanel?: DockPanelSvg;
   private outputAreaWidget?: OutputArea;
   private scrollingWidget?: ScrollingWidget<OutputArea>;
@@ -71,6 +73,7 @@ export abstract class ScriptEditor extends DocumentWidget<
   private emptyOutput: boolean;
   private runDisabled: boolean;
   private kernelSelectorRef: RefObject<ISelect> | null;
+  private clusterSelectorRef: RefObject<ISelect> | null;
   private controller: ScriptEditorController;
   abstract getLanguage(): string;
   abstract getIcon(): LabIcon | string;
@@ -86,7 +89,9 @@ export abstract class ScriptEditor extends DocumentWidget<
     this.model = this.content.model;
     this.runner = new ScriptRunner(this.disableRun);
     this.kernelSelectorRef = null;
+    this.clusterSelectorRef = null;
     this.kernelName = '';
+    this.execType = 0;
     this.emptyOutput = true;
     this.runDisabled = false;
     this.controller = new ScriptEditorController();
@@ -146,6 +151,33 @@ export abstract class ScriptEditor extends DocumentWidget<
       );
       this.toolbar.insertItem(3, 'select', kernelDropDown);
     }
+
+    let dropdown_options = {
+      options: [
+        { display_name: 'Local execution' },
+        { display_name: 'GPU execution' },
+        { display_name: 'CPU execution' }
+      ]
+    };
+
+    console.log('Dropdown options:\t' + dropdown_options);
+
+    this.execType = Object.values(
+      dropdown_options?.options ?? []
+    )[0]?.display_name;
+
+    console.log('Debugging exectype');
+    console.log(Object.values(dropdown_options?.options ?? []));
+
+    this.clusterSelectorRef = React.createRef<ISelect>();
+
+    const clusterDropdown = new ClusterDropdown(
+      dropdown_options,
+      this.clusterSelectorRef
+    );
+    this.toolbar.addItem('select-cluster', clusterDropdown);
+    console.log('Logging Toolbar:');
+    console.log(this.toolbar);
   };
 
   /**
@@ -181,12 +213,15 @@ export abstract class ScriptEditor extends DocumentWidget<
   private runScript = async (): Promise<void> => {
     if (!this.runDisabled) {
       this.kernelName = this.kernelSelectorRef?.current?.getSelection();
+      this.execType = this.clusterSelectorRef?.current?.getSelection();
       this.resetOutputArea();
       this.kernelName && this.displayOutputArea();
+      this.execType && this.displayOutputArea();
       await this.runner.runScript(
         this.kernelName,
         this.context.path,
         this.model.value.text,
+        this.execType,
         this.handleKernelMsg
       );
     }

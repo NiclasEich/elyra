@@ -25,6 +25,7 @@ import React, {
 } from 'react';
 
 const KERNEL_SELECT_CLASS = 'elyra-ScriptEditor-KernelSelector';
+const CLUSTER_SELECT_CLASS = 'elyra-ScriptEditor-ClusterSelector';
 
 export interface ISelect {
   getSelection: () => string;
@@ -73,6 +74,46 @@ const DropDown = forwardRef<ISelect, IProps>(({ specs }, select) => {
   );
 });
 
+const TestDropDown = forwardRef<ISelect, string>(({ specs }, select) => {
+  const initVal = '0';
+  const [selection, setSelection] = useState(initVal);
+
+  // Note: It's normally best to avoid using an imperative handle if possible.
+  // The better option would be to track state in the parent component and handle
+  // the change events there as well, but I know this isn't always possible
+  // alongside jupyter.
+  useImperativeHandle(select, () => ({
+    getSelection: (): string => selection
+  }));
+
+  const clusterOptions = !Object.keys(specs.options).length ? (
+    <option key="no-cluster" value="no-cluster">
+      No Cluster
+    </option>
+  ) : (
+    Object.entries(specs.options).map(([key, val]) => (
+      <option key={key} value={key}>
+        {val?.display_name ?? key}
+      </option>
+    ))
+  );
+
+  console.log('Debugging clusterOptions:');
+  console.log(clusterOptions);
+  console.log('Debugging specs:');
+  console.log(specs);
+  console.log(specs.options);
+
+  return (
+    <select
+      className={CLUSTER_SELECT_CLASS}
+      onChange={(e): void => setSelection(e.target.value)}
+      value={selection}
+    >
+      {clusterOptions}
+    </select>
+  );
+});
 /**
  * Wrap the dropDown into a React Widget in order to insert it into a Lab Toolbar Widget
  */
@@ -84,10 +125,24 @@ export class KernelDropdown extends ReactWidget {
     private specs: KernelSpec.ISpecModels,
     private ref: RefObject<ISelect>
   ) {
+    console.log('KernelSpecs:\t' + specs);
     super();
   }
 
   render(): React.ReactElement {
     return <DropDown ref={this.ref} specs={this.specs} />;
+  }
+}
+
+export class ClusterDropdown extends ReactWidget {
+  /**
+   * Construct a new CellTypeSwitcher widget.
+   */
+  constructor(private specs, private ref: RefObject<ISelect>) {
+    super();
+  }
+
+  render(): React.ReactElement {
+    return <TestDropDown ref={this.ref} specs={this.specs} />;
   }
 }
