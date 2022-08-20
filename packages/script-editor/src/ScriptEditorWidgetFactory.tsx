@@ -22,6 +22,7 @@ import {
 } from '@jupyterlab/docregistry';
 import { FileEditor } from '@jupyterlab/fileeditor';
 
+import { CustomScriptEditor } from './CustomScriptEditor';
 import { ScriptEditor } from './ScriptEditor';
 
 /**
@@ -87,5 +88,68 @@ export namespace ScriptEditorWidgetFactory {
     instanceCreator: (
       options: DocumentWidget.IOptions<FileEditor, DocumentRegistry.ICodeModel>
     ) => ScriptEditor;
+  }
+}
+
+export class CustomScriptEditorWidgetFactory extends ABCWidgetFactory<
+  CustomScriptEditor,
+  DocumentRegistry.ICodeModel
+> {
+  private options: CustomScriptEditorWidgetFactory.IOptions;
+  /**
+   * Construct a new editor widget factory.
+   */
+  constructor(options: CustomScriptEditorWidgetFactory.IOptions) {
+    super(options.factoryOptions);
+    this._services = options.editorServices;
+    this.options = options;
+  }
+
+  /**
+   * Create a new widget given a context.
+   */
+  protected createNewWidget(
+    context: DocumentRegistry.CodeContext
+  ): CustomScriptEditor {
+    const newDocumentEditor = this._services.factoryService.newDocumentEditor;
+    const factory: CodeEditor.Factory = options => {
+      return newDocumentEditor(options);
+    };
+    const content = new FileEditor({
+      factory,
+      context,
+      mimeTypeService: this._services.mimeTypeService
+    });
+
+    return this.options.instanceCreator({ content, context });
+  }
+
+  private _services: IEditorServices;
+}
+
+/**
+ * The namespace for `CustomScriptEditorWidgetFactory` class statics.
+ */
+export namespace CustomScriptEditorWidgetFactory {
+  /**
+   * The options used to create an editor widget factory.
+   */
+  export interface IOptions {
+    /**
+     * The editor services used by the factory.
+     */
+    editorServices: IEditorServices;
+
+    /**
+     * The factory options associated with the factory.
+     */
+    factoryOptions: DocumentRegistry.IWidgetFactoryOptions<CustomScriptEditor>;
+
+    /**
+     * The function that creates .
+     */
+    instanceCreator: (
+      options: DocumentWidget.IOptions<FileEditor, DocumentRegistry.ICodeModel>
+    ) => CustomScriptEditor;
   }
 }

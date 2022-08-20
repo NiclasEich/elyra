@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { ScriptEditorWidgetFactory, ScriptEditor } from '@elyra/script-editor';
+import { CustomScriptEditorWidgetFactory } from '@elyra/script-editor';
+import { CustomScriptEditor } from '@elyra/script-editor';
 import { execIcon } from '@elyra/ui-components';
 
 import {
@@ -37,14 +38,14 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { JSONObject } from '@lumino/coreutils';
 
-import { PythonEditor } from './PythonEditor';
+import { ExecutionEditor } from './ExecutionEditor';
 
-const PYTHON_FACTORY = 'Python Editor';
+const PYTHON_FACTORY = 'Execution Editor';
 const PYTHON = 'python';
 const PYTHON_EDITOR_NAMESPACE = 'elyra-execution-editor-extension';
 
 const commandIDs = {
-  createNewPythonEditor: 'script-editor:create-new-execution-editor',
+  createNewExecutionEditor: 'script-editor:create-new-execution-editor',
   openDocManager: 'docmanager:open',
   newDocManager: 'docmanager:new-untitled'
 };
@@ -75,7 +76,7 @@ const extension: JupyterFrontEndPlugin<void> = {
   ) => {
     console.log('Elyra - executino-editor extension is activated!');
 
-    const factory = new ScriptEditorWidgetFactory({
+    const factory = new CustomScriptEditorWidgetFactory({
       editorServices,
       factoryOptions: {
         name: PYTHON_FACTORY,
@@ -87,7 +88,7 @@ const extension: JupyterFrontEndPlugin<void> = {
           FileEditor,
           DocumentRegistry.ICodeModel
         >
-      ): ScriptEditor => new PythonEditor(options)
+      ): CustomScriptEditor => new ExecutionEditor(options)
     });
 
     app.docRegistry.addFileType({
@@ -102,9 +103,9 @@ const extension: JupyterFrontEndPlugin<void> = {
     const { restored } = app;
 
     /**
-     * Track PythonEditor widget on page refresh
+     * Track ExecutionEditor widget on page refresh
      */
-    const tracker = new WidgetTracker<ScriptEditor>({
+    const tracker = new WidgetTracker<CustomScriptEditor>({
       namespace: PYTHON_EDITOR_NAMESPACE
     });
 
@@ -147,7 +148,7 @@ const extension: JupyterFrontEndPlugin<void> = {
     /**
      * Update the settings of a widget. Adapted from fileeditor-extension.
      */
-    const updateWidget = (widget: ScriptEditor): void => {
+    const updateWidget = (widget: CustomScriptEditor): void => {
       if (!editorTracker.has(widget)) {
         (editorTracker as WidgetTracker<IDocumentWidget<FileEditor>>).add(
           widget
@@ -203,7 +204,7 @@ const extension: JupyterFrontEndPlugin<void> = {
     // Add a python launcher
     if (launcher) {
       launcher.add({
-        command: commandIDs.createNewPythonEditor,
+        command: commandIDs.createNewExecutionEditor,
         category: 'Elyra',
         rank: 4
       });
@@ -212,7 +213,12 @@ const extension: JupyterFrontEndPlugin<void> = {
     if (menu) {
       // Add new python editor creation to the file menu
       menu.fileMenu.newMenu.addGroup(
-        [{ command: commandIDs.createNewPythonEditor, args: { isMenu: true } }],
+        [
+          {
+            command: commandIDs.createNewExecutionEditor,
+            args: { isMenu: true }
+          }
+        ],
         92
       );
     }
@@ -234,7 +240,7 @@ const extension: JupyterFrontEndPlugin<void> = {
     };
 
     // Add a command to create new Python editor
-    app.commands.addCommand(commandIDs.createNewPythonEditor, {
+    app.commands.addCommand(commandIDs.createNewExecutionEditor, {
       label: args =>
         args['isPalette'] ? 'New Execution Editor' : 'Execution Editor',
       caption: 'Create a new Execution Editor',
@@ -246,7 +252,7 @@ const extension: JupyterFrontEndPlugin<void> = {
     });
 
     palette.addItem({
-      command: commandIDs.createNewPythonEditor,
+      command: commandIDs.createNewExecutionEditor,
       args: { isPalette: true },
       category: 'Elyra'
     });

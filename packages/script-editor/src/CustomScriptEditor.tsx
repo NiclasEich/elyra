@@ -40,8 +40,13 @@ import { BoxLayout, PanelLayout, Widget } from '@lumino/widgets';
 import React, { RefObject } from 'react';
 
 import { KernelDropdown, ISelect } from './KernelDropdown';
+import {
+  ClusterDropdown,
+  IDropPropsOptions,
+  CommandLine
+} from './KernelDropdown';
 import { ScriptEditorController } from './ScriptEditorController';
-import { ScriptRunner } from './ScriptRunner';
+import { CustomScriptRunner } from './ScriptRunner';
 
 /**
  * The CSS class added to widgets.
@@ -58,12 +63,13 @@ const TOOLBAR_CLASS = 'elyra-ScriptEditor-Toolbar';
 /**
  * A widget for script editors.
  */
-export abstract class ScriptEditor extends DocumentWidget<
+export abstract class CustomScriptEditor extends DocumentWidget<
   FileEditor,
   DocumentRegistry.ICodeModel
 > {
-  private runner: ScriptRunner;
+  private runner: CustomScriptRunner;
   private kernelName?: string;
+  private execType?: string;
   private dockPanel?: DockPanelSvg;
   private outputAreaWidget?: OutputArea;
   private scrollingWidget?: ScrollingWidget<OutputArea>;
@@ -71,6 +77,7 @@ export abstract class ScriptEditor extends DocumentWidget<
   private emptyOutput: boolean;
   private runDisabled: boolean;
   private kernelSelectorRef: RefObject<ISelect> | null;
+  private clusterSelectorRef: RefObject<ISelect> | null;
   private controller: ScriptEditorController;
   abstract getLanguage(): string;
   abstract getIcon(): LabIcon | string;
@@ -84,9 +91,11 @@ export abstract class ScriptEditor extends DocumentWidget<
     super(options);
     this.addClass(SCRIPT_EDITOR_CLASS);
     this.model = this.content.model;
-    this.runner = new ScriptRunner(this.disableRun);
+    this.runner = new CustomScriptRunner(this.disableRun);
     this.kernelSelectorRef = null;
+    this.clusterSelectorRef = null;
     this.kernelName = '';
+    this.execType = 'local';
     this.emptyOutput = true;
     this.runDisabled = false;
     this.controller = new ScriptEditorController();
@@ -146,6 +155,26 @@ export abstract class ScriptEditor extends DocumentWidget<
       );
       this.toolbar.insertItem(3, 'select', kernelDropDown);
     }
+
+    const dropdown_options: IDropPropsOptions[] = [
+      { display_name: 'Local execution', identifier: 'local' },
+      { display_name: 'GPU-cluster execution', identifier: 'gpu' },
+      { display_name: 'CPU-cluster execution', identifier: 'cpu' }
+    ];
+
+    this.execType = dropdown_options[0].identifier;
+
+    this.clusterSelectorRef = React.createRef<ISelect>();
+
+    const clusterDropdown = new ClusterDropdown(
+      dropdown_options,
+      this.clusterSelectorRef
+    );
+
+    this.toolbar.addItem('select-cluster', clusterDropdown);
+
+    const commandLine = new CommandLine();
+    this.toolbar.addItem('write-input', commandLine);
   };
 
   /**
@@ -181,12 +210,18 @@ export abstract class ScriptEditor extends DocumentWidget<
   private runScript = async (): Promise<void> => {
     if (!this.runDisabled) {
       this.kernelName = this.kernelSelectorRef?.current?.getSelection();
+      this.execType = this.clusterSelectorRef?.current?.getSelection();
       this.resetOutputArea();
       this.kernelName && this.displayOutputArea();
+      this.execType && this.displayOutputArea();
+
+      console.log('Debugging exec type:', this.execType);
+      console.log('Debugging current', this.clusterSelectorRef?.current);
       await this.runner.runScript(
         this.kernelName,
         this.context.path,
         this.model.value.text,
+        this.execType,
         this.handleKernelMsg
       );
     }

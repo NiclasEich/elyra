@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ScriptEditor } from '@elyra/script-editor';
+import { CustomScriptEditor } from '@elyra/script-editor';
 import { pyIcon } from '@elyra/ui-components';
 
 import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
 import { FileEditor } from '@jupyterlab/fileeditor';
 import { LabIcon } from '@jupyterlab/ui-components';
 
-export class PythonEditor extends ScriptEditor {
+export class ExecutionEditor extends CustomScriptEditor {
   /**
    * Construct a new Python Editor widget.
    */

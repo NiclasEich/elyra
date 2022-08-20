@@ -35,6 +35,15 @@ interface IProps {
   specs: KernelSpec.ISpecModels;
 }
 
+export interface IDropPropsOptions {
+  display_name: string;
+  identifier: string;
+}
+
+export interface IDropProps {
+  specs: IDropPropsOptions[];
+}
+
 /**
  * A toolbar dropdown component populated with available kernel specs.
  */
@@ -74,8 +83,10 @@ const DropDown = forwardRef<ISelect, IProps>(({ specs }, select) => {
   );
 });
 
-const TestDropDown = forwardRef<ISelect, string>(({ specs }, select) => {
-  const initVal = '0';
+// eslint-disable-next-line react/display-name
+const TestDropDown = forwardRef<ISelect, IDropProps>(({ specs }, select) => {
+  const initVal = specs[0].display_name ?? 'local';
+  // const initVal = '0': {display_name: 'Local Execution'};
   const [selection, setSelection] = useState(initVal);
 
   // Note: It's normally best to avoid using an imperative handle if possible.
@@ -86,23 +97,19 @@ const TestDropDown = forwardRef<ISelect, string>(({ specs }, select) => {
     getSelection: (): string => selection
   }));
 
-  const clusterOptions = !Object.keys(specs.options).length ? (
+  const clusterOptions = !Object.keys(specs).length ? (
     <option key="no-cluster" value="no-cluster">
       No Cluster
     </option>
   ) : (
-    Object.entries(specs.options).map(([key, val]) => (
+    Object.entries(specs).map(([key, val]) => (
       <option key={key} value={key}>
         {val?.display_name ?? key}
       </option>
     ))
   );
 
-  console.log('Debugging clusterOptions:');
-  console.log(clusterOptions);
-  console.log('Debugging specs:');
-  console.log(specs);
-  console.log(specs.options);
+  console.log('Selection:\t' + selection);
 
   return (
     <select
@@ -125,7 +132,6 @@ export class KernelDropdown extends ReactWidget {
     private specs: KernelSpec.ISpecModels,
     private ref: RefObject<ISelect>
   ) {
-    console.log('KernelSpecs:\t' + specs);
     super();
   }
 
@@ -138,11 +144,53 @@ export class ClusterDropdown extends ReactWidget {
   /**
    * Construct a new CellTypeSwitcher widget.
    */
-  constructor(private specs, private ref: RefObject<ISelect>) {
+  constructor(
+    private specs: IDropPropsOptions[],
+    private ref: RefObject<ISelect>
+  ) {
     super();
   }
 
   render(): React.ReactElement {
     return <TestDropDown ref={this.ref} specs={this.specs} />;
+  }
+}
+
+const Textline: React.FC = (): JSX.Element => {
+  const [query, setQuery] = useState('');
+  //const [query] = useState('');
+
+  // This function is called when the input changes
+  const inputHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const enteredName = event.target.value;
+    setQuery(enteredName);
+  };
+
+  // This function is triggered when the button is clicked
+  // const execute = () => {
+  //   console.log('Hello');
+  // };
+
+  return (
+    <div className="container">
+      <div className="wrapper">
+        <input
+          value={query}
+          // onChange={inputHandler}
+          placeholder="Command"
+          className="input"
+        />
+        {/* <button onClick={execute}>Execute</button> */}
+      </div>
+    </div>
+  );
+};
+
+export class CommandLine extends ReactWidget {
+  constructor() {
+    super();
+  }
+  render(): React.ReactElement {
+    return <Textline />;
   }
 }

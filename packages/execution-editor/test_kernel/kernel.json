@@ -1,0 +1,6 @@
+{
+  "argv": ["python", "-m", "test_kernel", "-f", "{connection_file}"],
+  "display_name": "Testkernel",
+  "name": "TestKernel",
+  "language": "python"
+}
