@@ -21,8 +21,12 @@ import React, {
   forwardRef,
   useImperativeHandle,
   useState,
-  RefObject
+  RefObject,
+  useRef,
+  useEffect
 } from 'react';
+
+import { CustomScriptEditor } from './CustomScriptEditor';
 
 const KERNEL_SELECT_CLASS = 'elyra-ScriptEditor-KernelSelector';
 const CLUSTER_SELECT_CLASS = 'elyra-ScriptEditor-ClusterSelector';
@@ -83,11 +87,20 @@ const DropDown = forwardRef<ISelect, IProps>(({ specs }, select) => {
   );
 });
 
+const usePrevious = function<T>(value: T): T | undefined {
+  const ref = useRef<T>();
+  useEffect(() => {
+    ref.current = value;
+  }, [value]);
+  return ref.current;
+};
+
 // eslint-disable-next-line react/display-name
 const TestDropDown = forwardRef<ISelect, IDropProps>(({ specs }, select) => {
+  console.log(specs);
   const initVal = specs[0].display_name ?? 'local';
-  // const initVal = '0': {display_name: 'Local Execution'};
   const [selection, setSelection] = useState(initVal);
+  const prevSelection = usePrevious(selection);
 
   // Note: It's normally best to avoid using an imperative handle if possible.
   // The better option would be to track state in the parent component and handle
@@ -110,11 +123,21 @@ const TestDropDown = forwardRef<ISelect, IDropProps>(({ specs }, select) => {
   );
 
   console.log('Selection:\t' + selection);
+  console.log('prev Selection:' + prevSelection);
+
+  if (selection === '3') {
+    CustomScriptEditor.instance.addToolbar();
+  }
+  if (prevSelection === '3') {
+    CustomScriptEditor.instance.removeToolbar();
+  }
 
   return (
     <select
       className={CLUSTER_SELECT_CLASS}
-      onChange={(e): void => setSelection(e.target.value)}
+      onChange={(e): void => {
+        setSelection(e.target.value);
+      }}
       value={selection}
     >
       {clusterOptions}
@@ -158,25 +181,20 @@ export class ClusterDropdown extends ReactWidget {
 
 const Textline: React.FC = (): JSX.Element => {
   const [query, setQuery] = useState('');
-  //const [query] = useState('');
 
   // This function is called when the input changes
-  const inputHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const inputHandler = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const enteredName = event.target.value;
+    (window as any).command = enteredName;
     setQuery(enteredName);
   };
-
-  // This function is triggered when the button is clicked
-  // const execute = () => {
-  //   console.log('Hello');
-  // };
 
   return (
     <div className="container">
       <div className="wrapper">
         <input
           value={query}
-          // onChange={inputHandler}
+          onChange={inputHandler}
           placeholder="Command"
           className="input"
         />
@@ -186,7 +204,7 @@ const Textline: React.FC = (): JSX.Element => {
   );
 };
 
-export class CommandLine extends ReactWidget {
+export class TextLine extends ReactWidget {
   constructor() {
     super();
   }

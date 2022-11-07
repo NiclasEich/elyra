@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// import { threadId } from 'worker_threads';
+
 import { ToolbarButton, showDialog, Dialog } from '@jupyterlab/apputils';
 import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
 import { FileEditor } from '@jupyterlab/fileeditor';
@@ -40,11 +42,7 @@ import { BoxLayout, PanelLayout, Widget } from '@lumino/widgets';
 import React, { RefObject } from 'react';
 
 import { KernelDropdown, ISelect } from './KernelDropdown';
-import {
-  ClusterDropdown,
-  IDropPropsOptions,
-  CommandLine
-} from './KernelDropdown';
+import { ClusterDropdown, IDropPropsOptions, TextLine } from './KernelDropdown';
 import { ScriptEditorController } from './ScriptEditorController';
 import { CustomScriptRunner } from './ScriptRunner';
 
@@ -79,6 +77,8 @@ export abstract class CustomScriptEditor extends DocumentWidget<
   private kernelSelectorRef: RefObject<ISelect> | null;
   private clusterSelectorRef: RefObject<ISelect> | null;
   private controller: ScriptEditorController;
+  private commandLine: TextLine | null;
+  static instance: CustomScriptEditor;
   abstract getLanguage(): string;
   abstract getIcon(): LabIcon | string;
 
@@ -99,6 +99,9 @@ export abstract class CustomScriptEditor extends DocumentWidget<
     this.emptyOutput = true;
     this.runDisabled = false;
     this.controller = new ScriptEditorController();
+    this.commandLine = new TextLine();
+
+    CustomScriptEditor.instance = this;
 
     // Add icon to main tab
     this.title.icon = this.getIcon();
@@ -159,7 +162,8 @@ export abstract class CustomScriptEditor extends DocumentWidget<
     const dropdown_options: IDropPropsOptions[] = [
       { display_name: 'Local execution', identifier: 'local' },
       { display_name: 'GPU-cluster execution', identifier: 'gpu' },
-      { display_name: 'CPU-cluster execution', identifier: 'cpu' }
+      { display_name: 'CPU-cluster execution', identifier: 'cpu' },
+      { display_name: 'Custom Command', identifier: 'command' }
     ];
 
     this.execType = dropdown_options[0].identifier;
@@ -172,9 +176,16 @@ export abstract class CustomScriptEditor extends DocumentWidget<
     );
 
     this.toolbar.addItem('select-cluster', clusterDropdown);
+  };
 
-    const commandLine = new CommandLine();
-    this.toolbar.addItem('write-input', commandLine);
+  addToolbar = (): void => {
+    this.toolbar.addItem('write-input', this.commandLine!);
+    this.toolbar.update();
+  };
+
+  removeToolbar = (): void => {
+    this.commandLine!.parent = null;
+    this.toolbar.update();
   };
 
   /**

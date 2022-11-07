@@ -240,8 +240,10 @@ export class CustomScriptRunner {
         // session didn't get started
         return this.errorDialog(SESSION_ERROR_MSG);
       }
+
       console.log('Kernel name:\t' + kernelName);
       console.log('execType:\t' + execType);
+
       // const custom_code = `print("Starting ${contextPath}")\ncommand = "python ${contextPath}"\n!{command}\nprint("Finished execution")`
       if (execType === 'local') {
         code = `print("Starting ${contextPath} locally")\ncommand = "python ${contextPath}"\n!{command}\nprint("Finished execution")`;
@@ -252,6 +254,11 @@ export class CustomScriptRunner {
       if (execType === 'cpu') {
         code = `print("Executing ${contextPath} on CPU cluster")\ncommand = "python ${contextPath}"\n!{command}\nprint("Finished execution")`;
       }
+      if (execType === '3') {
+        const customCommand = (window as any).command;
+        console.log(customCommand);
+        code = `print("Executing ${contextPath} as custom command")\ncommand = "python ${contextPath}"\n!{command}\nprint("Finished execution")`;
+      }
       console.log('File content:\n' + code);
       // console.log('Running code:\n' + custom_code);
 
@@ -259,7 +266,7 @@ export class CustomScriptRunner {
 
       future.onIOPub = (msg: any): void => {
         const msgOutput: any = {};
-        console.log('MEssage type: ' + msg.msg_type);
+        console.log('Message type: ' + msg.msg_type);
 
         if (msg.msg_type === 'error') {
           msgOutput.error = {
