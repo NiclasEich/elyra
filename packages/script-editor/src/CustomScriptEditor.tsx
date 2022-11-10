@@ -42,7 +42,12 @@ import { BoxLayout, PanelLayout, Widget } from '@lumino/widgets';
 import React, { RefObject } from 'react';
 
 import { KernelDropdown, ISelect } from './KernelDropdown';
-import { ClusterDropdown, IDropPropsOptions, TextLine } from './KernelDropdown';
+import {
+  ClusterDropdown,
+  IDropPropsOptions,
+  TextLine,
+  ReadLine
+} from './KernelDropdown';
 import { ScriptEditorController } from './ScriptEditorController';
 import { CustomScriptRunner } from './ScriptRunner';
 
@@ -77,7 +82,7 @@ export abstract class CustomScriptEditor extends DocumentWidget<
   private kernelSelectorRef: RefObject<ISelect> | null;
   private clusterSelectorRef: RefObject<ISelect> | null;
   private controller: ScriptEditorController;
-  private commandLine: TextLine | null;
+  private commandLine: TextLine | ReadLine | null;
   static instance: CustomScriptEditor;
   abstract getLanguage(): string;
   abstract getIcon(): LabIcon | string;
@@ -99,7 +104,7 @@ export abstract class CustomScriptEditor extends DocumentWidget<
     this.emptyOutput = true;
     this.runDisabled = false;
     this.controller = new ScriptEditorController();
-    this.commandLine = new TextLine();
+    this.commandLine = new ReadLine('python %file');
 
     CustomScriptEditor.instance = this;
 
@@ -176,15 +181,20 @@ export abstract class CustomScriptEditor extends DocumentWidget<
     );
 
     this.toolbar.addItem('select-cluster', clusterDropdown);
+    this.toolbar.addItem('read-input', this.commandLine!);
   };
 
-  addToolbar = (): void => {
-    this.toolbar.addItem('write-input', this.commandLine!);
+  addCommandLine = (prevCommand: string): void => {
+    this.commandLine!.parent = null;
+    this.commandLine = new TextLine(prevCommand);
+    this.toolbar.addItem('write-input', this.commandLine);
     this.toolbar.update();
   };
 
-  removeToolbar = (): void => {
+  removeCommandLine = (command: string): void => {
     this.commandLine!.parent = null;
+    this.commandLine = new ReadLine(command);
+    this.toolbar.addItem('read-input', this.commandLine);
     this.toolbar.update();
   };
 

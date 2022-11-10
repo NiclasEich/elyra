@@ -125,11 +125,23 @@ const TestDropDown = forwardRef<ISelect, IDropProps>(({ specs }, select) => {
   console.log('Selection:\t' + selection);
   console.log('prev Selection:' + prevSelection);
 
+  const command = (select: string): string => {
+    let command = '';
+    if (select === '1') {
+      command = 'gpu %file';
+    } else if (select === '2') {
+      command = 'cpu %file';
+    } else {
+      command = 'python %file';
+    }
+    return command;
+  };
+
   if (selection === '3') {
-    CustomScriptEditor.instance.addToolbar();
+    CustomScriptEditor.instance.addCommandLine(command(prevSelection!));
   }
-  if (prevSelection === '3') {
-    CustomScriptEditor.instance.removeToolbar();
+  if (selection !== '3') {
+    CustomScriptEditor.instance.removeCommandLine(command(selection!));
   }
 
   return (
@@ -179,8 +191,10 @@ export class ClusterDropdown extends ReactWidget {
   }
 }
 
-const Textline: React.FC = (): JSX.Element => {
-  const [query, setQuery] = useState('');
+const Textline: React.FC<{ defaultValue: string }> = ({
+  defaultValue
+}): JSX.Element => {
+  const [query, setQuery] = useState(defaultValue);
 
   // This function is called when the input changes
   const inputHandler = (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -192,23 +206,38 @@ const Textline: React.FC = (): JSX.Element => {
   return (
     <div className="container">
       <div className="wrapper">
-        <input
-          value={query}
-          onChange={inputHandler}
-          placeholder="Command"
-          className="input"
-        />
-        {/* <button onClick={execute}>Execute</button> */}
+        <input value={query} onChange={inputHandler} className="input" />
       </div>
     </div>
   );
 };
 
 export class TextLine extends ReactWidget {
-  constructor() {
+  constructor(private defaultValue: string) {
     super();
   }
   render(): React.ReactElement {
-    return <Textline />;
+    return <Textline defaultValue={this.defaultValue} />;
+  }
+}
+
+const Readline: React.FC<{ placeholder: string }> = ({
+  placeholder
+}): JSX.Element => {
+  return (
+    <div className="container">
+      <div className="wrapper">
+        <input defaultValue={placeholder} className="input" readOnly />
+      </div>
+    </div>
+  );
+};
+
+export class ReadLine extends ReactWidget {
+  constructor(private command: string) {
+    super();
+  }
+  render(): React.ReactElement {
+    return <Readline placeholder={this.command} />;
   }
 }
