@@ -137,12 +137,12 @@ const TestDropDown = forwardRef<ISelect, IDropProps>(({ specs }, select) => {
     return command;
   };
 
-  if (selection === '3') {
-    CustomScriptEditor.instance.addCommandLine(command(prevSelection!));
-  }
-  if (selection !== '3') {
-    CustomScriptEditor.instance.removeCommandLine(command(selection!));
-  }
+  // if (selection === '3') {
+  //   CustomScriptEditor.instance.addCommandLine(command(prevSelection!));
+  // }
+  // if (selection !== '3') {
+  CustomScriptEditor.instance.addCommandLine(command(selection!));
+  // }
 
   return (
     <select
@@ -200,6 +200,7 @@ const Textline: React.FC<{ defaultValue: string }> = ({
   const inputHandler = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const enteredName = event.target.value;
     (window as any).command = enteredName;
+    console.log('command:' + enteredName);
     setQuery(enteredName);
   };
 
@@ -218,26 +219,5 @@ export class TextLine extends ReactWidget {
   }
   render(): React.ReactElement {
     return <Textline defaultValue={this.defaultValue} />;
-  }
-}
-
-const Readline: React.FC<{ placeholder: string }> = ({
-  placeholder
-}): JSX.Element => {
-  return (
-    <div className="container">
-      <div className="wrapper">
-        <input defaultValue={placeholder} className="input" readOnly />
-      </div>
-    </div>
-  );
-};
-
-export class ReadLine extends ReactWidget {
-  constructor(private command: string) {
-    super();
-  }
-  render(): React.ReactElement {
-    return <Readline placeholder={this.command} />;
   }
 }

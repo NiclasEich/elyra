@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// import { threadId } from 'worker_threads';
-
 import { ToolbarButton, showDialog, Dialog } from '@jupyterlab/apputils';
 import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
 import { FileEditor } from '@jupyterlab/fileeditor';
@@ -45,8 +43,8 @@ import { KernelDropdown, ISelect } from './KernelDropdown';
 import {
   ClusterDropdown,
   IDropPropsOptions,
-  TextLine,
-  ReadLine
+  TextLine
+  //ReadLine
 } from './KernelDropdown';
 import { ScriptEditorController } from './ScriptEditorController';
 import { CustomScriptRunner } from './ScriptRunner';
@@ -82,7 +80,7 @@ export abstract class CustomScriptEditor extends DocumentWidget<
   private kernelSelectorRef: RefObject<ISelect> | null;
   private clusterSelectorRef: RefObject<ISelect> | null;
   private controller: ScriptEditorController;
-  private commandLine: TextLine | ReadLine | null;
+  private commandLine: TextLine | null;
   static instance: CustomScriptEditor;
   abstract getLanguage(): string;
   abstract getIcon(): LabIcon | string;
@@ -104,7 +102,7 @@ export abstract class CustomScriptEditor extends DocumentWidget<
     this.emptyOutput = true;
     this.runDisabled = false;
     this.controller = new ScriptEditorController();
-    this.commandLine = new ReadLine('python %file');
+    this.commandLine = new TextLine('python %file');
 
     CustomScriptEditor.instance = this;
 
@@ -188,13 +186,6 @@ export abstract class CustomScriptEditor extends DocumentWidget<
     this.commandLine!.parent = null;
     this.commandLine = new TextLine(prevCommand);
     this.toolbar.addItem('write-input', this.commandLine);
-    this.toolbar.update();
-  };
-
-  removeCommandLine = (command: string): void => {
-    this.commandLine!.parent = null;
-    this.commandLine = new ReadLine(command);
-    this.toolbar.addItem('read-input', this.commandLine);
     this.toolbar.update();
   };
 

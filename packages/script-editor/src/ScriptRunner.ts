@@ -256,7 +256,7 @@ export class CustomScriptRunner {
       }
       if (execType === '3') {
         const customCommand = (window as any).command;
-        console.log(customCommand);
+        console.log('command: ' + customCommand);
         code = `print("Executing ${contextPath} as custom command")\ncommand = "python ${contextPath}"\n!{command}\nprint("Finished execution")`;
       }
       console.log('File content:\n' + code);
