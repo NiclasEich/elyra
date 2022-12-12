@@ -244,21 +244,10 @@ export class CustomScriptRunner {
       console.log('Kernel name:\t' + kernelName);
       console.log('execType:\t' + execType);
 
-      // const custom_code = `print("Starting ${contextPath}")\ncommand = "python ${contextPath}"\n!{command}\nprint("Finished execution")`
-      if (execType === 'local') {
-        code = `print("Starting ${contextPath} locally")\ncommand = "python ${contextPath}"\n!{command}\nprint("Finished execution")`;
-      }
-      if (execType === 'gpu') {
-        code = `print("Executing ${contextPath} on GPU cluster")\ncommand = "python ${contextPath}"\n!{command}\nprint("Finished execution")`;
-      }
-      if (execType === 'cpu') {
-        code = `print("Executing ${contextPath} on CPU cluster")\ncommand = "python ${contextPath}"\n!{command}\nprint("Finished execution")`;
-      }
-      if (execType === '3') {
-        const customCommand = (window as any).command;
-        console.log('command: ' + customCommand);
-        code = `print("Executing ${contextPath} as custom command")\ncommand = "python ${contextPath}"\n!{command}\nprint("Finished execution")`;
-      }
+      const customCommand = (window as any).command;
+      console.log('command: ' + customCommand);
+      code = `print("Executing ${contextPath} with ${customCommand}")\ncommand = "python ${contextPath}"\n!{command}\nprint("Finished execution")`;
+      // }
       console.log('File content:\n' + code);
       // console.log('Running code:\n' + custom_code);
 

@@ -87,20 +87,12 @@ const DropDown = forwardRef<ISelect, IProps>(({ specs }, select) => {
   );
 });
 
-const usePrevious = function<T>(value: T): T | undefined {
-  const ref = useRef<T>();
-  useEffect(() => {
-    ref.current = value;
-  }, [value]);
-  return ref.current;
-};
-
 // eslint-disable-next-line react/display-name
 const TestDropDown = forwardRef<ISelect, IDropProps>(({ specs }, select) => {
   console.log(specs);
   const initVal = specs[0].display_name ?? 'local';
   const [selection, setSelection] = useState(initVal);
-  const prevSelection = usePrevious(selection);
+  //const prevSelection = usePrevious(selection);
 
   // Note: It's normally best to avoid using an imperative handle if possible.
   // The better option would be to track state in the parent component and handle
@@ -123,7 +115,6 @@ const TestDropDown = forwardRef<ISelect, IDropProps>(({ specs }, select) => {
   );
 
   console.log('Selection:\t' + selection);
-  console.log('prev Selection:' + prevSelection);
 
   const command = (select: string): string => {
     let command = '';
@@ -134,15 +125,11 @@ const TestDropDown = forwardRef<ISelect, IDropProps>(({ specs }, select) => {
     } else {
       command = 'python %file';
     }
+    (window as any).command = command;
     return command;
   };
 
-  // if (selection === '3') {
-  //   CustomScriptEditor.instance.addCommandLine(command(prevSelection!));
-  // }
-  // if (selection !== '3') {
   CustomScriptEditor.instance.addCommandLine(command(selection!));
-  // }
 
   return (
     <select

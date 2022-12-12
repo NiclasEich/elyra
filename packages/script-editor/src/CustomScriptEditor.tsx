@@ -165,8 +165,8 @@ export abstract class CustomScriptEditor extends DocumentWidget<
     const dropdown_options: IDropPropsOptions[] = [
       { display_name: 'Local execution', identifier: 'local' },
       { display_name: 'GPU-cluster execution', identifier: 'gpu' },
-      { display_name: 'CPU-cluster execution', identifier: 'cpu' },
-      { display_name: 'Custom Command', identifier: 'command' }
+      { display_name: 'CPU-cluster execution', identifier: 'cpu' }
+      //{ display_name: 'Custom Command', identifier: 'command' }
     ];
 
     this.execType = dropdown_options[0].identifier;
